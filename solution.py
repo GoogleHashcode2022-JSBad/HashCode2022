@@ -45,15 +45,21 @@ class Solution:
 
     def solve(self):
         for project in self.projects:
-            contributers_copy = set(self.contributers)
-            for skill_required in project.skills:
-                for contributer in contributers_copy:
-                    if skill_required in contributer.skills:
-                        if contributer.skills[skill_required] >= project.skills[skill_required]:
+            for skill_name in project.skills:
+                for contributer in self.contributers:
+                    if skill_name in contributer.skills:
+                        if contributer.skills[skill_name] >= project.skills[skill_name]:
                             project.contributers.append(contributer)
-                            contributers_copy.remove(contributer)
+                            if contributer.skills[skill_name] == project.skills[skill_name]:
+                                contributer.skills[skill_name] += 1
                             break
-                    
+
+            if len(project.contributers) < project.num_roles:
+                for i in range(project.num_roles - len(project.contributers)):
+                    for contributer in self.contributers:
+                        if contributer not in project.contributers:
+                            project.contributers.append(contributer)
+                            break
 
 
     def write_output(self):
@@ -63,6 +69,8 @@ class Solution:
             f.write(str(self.P) + "\n")
             for project in self.projects:
                 f.write(project.name + "\n")
+                # print("project: " + project.name)
+                # print("Contributers: " + str(project.contributers))
                 for contributer in project.contributers[:-1]:
                     f.write(contributer.name + " ")
                 f.write(project.contributers[-1].name + "\n")
@@ -85,9 +93,7 @@ class Project:
         self.skills = {}
         self.contributers = []
 
-        
-
-
+    
 class Contributer:
     def __init__(self, name, num_skills):
         self.name = name
@@ -99,6 +105,7 @@ if __name__ == "__main__":
     test_case_number = 1
     file_names = ["input_data/a_an_example.in.txt", "input_data/b_better_start_small.in.txt", "input_data/c_collaboration.in.txt", "input_data/d_dense_schedule.in.txt", "input_data/e_exceptional_skills.in.txt", "input_data/f_find_great_mentors.in.txt"]
     for file_name in file_names:
+        # print("test_case_number: " + str(test_case_number))
         solution = Solution()
         solution.get_input(file_name)
         solution.solve()
