@@ -45,22 +45,45 @@ class Solution:
 
     def solve(self):
         for project in self.projects:
-            for skill_name in project.skills:
+            for i, skill_name in enumerate(project.skills.keys()):
                 for contributer in self.contributers:
                     if skill_name in contributer.skills:
                         if contributer.skills[skill_name] >= project.skills[skill_name]:
-                            project.contributers.append(contributer)
+                            project.contributers[i] = contributer
                             if contributer.skills[skill_name] == project.skills[skill_name]:
                                 contributer.skills[skill_name] += 1
                             break
+            if None in project.contributers:
+                for i, skill_name in enumerate(project.skills.keys()):
+                    for contributer in self.contributers:
+                        if skill_name in contributer.skills:
+                            if contributer.skills[skill_name] == project.skills[skill_name] - 1:
+                                for possible_mentor in project.contributers:
+                                    if possible_mentor:
+                                        if possible_mentor.skills.get(skill_name, -1) >= project.skills[skill_name] - 1:
+                                            project.contributers[i] = contributer
+                                            contributer.skills[skill_name] += 1
+                                            break
 
-            if len(project.contributers) < project.num_roles:
-                for i in range(project.num_roles - len(project.contributers)):
+            if None in project.contributers:
+                for i, skill_name in enumerate(project.skills.keys()):
+                    if project.contributers[i]:
+                        continue
+                    for contributer in self.contributers:
+                        if skill_name in contributer.skills and (contributer not in project.contributers):
+                            project.contributers[i] = contributer
+                            contributer.skills[skill_name] += 1
+                            break
+            
+            if None in project.contributers:
+                for cont in project.contributers:
+                    if cont:
+                        continue
                     for contributer in self.contributers:
                         if contributer not in project.contributers:
-                            project.contributers.append(contributer)
+                            project.contributers[project.contributers.index(cont)] = contributer
                             break
-
+                                
 
     def write_output(self):
         global test_case_number
@@ -80,7 +103,6 @@ class Solution:
         #             f.write(str(copy.pop().name) + " ")
         #         f.write(str(copy.pop().name) + "\n")
 
-
             
 
 class Project:
@@ -90,8 +112,8 @@ class Project:
         self.score_completion = score_completion
         self.best_before = best_before
         self.num_roles = num_roles
-        self.skills = {}
-        self.contributers = []
+        self.skill_names = {}
+        self.contributers = [None for i in range(num_roles)]
 
     
 class Contributer:
@@ -105,7 +127,7 @@ if __name__ == "__main__":
     test_case_number = 1
     file_names = ["input_data/a_an_example.in.txt", "input_data/b_better_start_small.in.txt", "input_data/c_collaboration.in.txt", "input_data/d_dense_schedule.in.txt", "input_data/e_exceptional_skills.in.txt", "input_data/f_find_great_mentors.in.txt"]
     for file_name in file_names:
-        # print("test_case_number: " + str(test_case_number))
+        print("test_case_number: " + str(test_case_number))
         solution = Solution()
         solution.get_input(file_name)
         solution.solve()
